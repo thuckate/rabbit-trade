@@ -1,0 +1,7 @@
+rootProject.name = 'rabbit-platform'
+include 'core'
+include 'rabbit-trade'
+include 'rabbit-tutorial'
+include 'rabbit-trade:crawl-app'
+findProject(':rabbit-trade:crawl-app')?.name = 'crawl-app'
+
