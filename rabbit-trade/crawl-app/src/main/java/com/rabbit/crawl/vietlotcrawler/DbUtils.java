@@ -46,7 +46,6 @@ public class DbUtils {
   }
 
   public static String executeMaxId(String sql, String ...params) {
-    Map<String, String> rs = new HashMap<>();
     try (Connection conn = DriverManager.getConnection(url, user, password)) {
       PreparedStatement stmt = conn.prepareStatement(sql);
       int index = 1;

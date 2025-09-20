@@ -89,19 +89,19 @@ public class VietlotServiceImpl implements VietlotService {
 
     Result result = getInfoBasedOnUrl(type.getBasedUrl());
     List<String[]> bulkResult = new ArrayList<>();
-    String maxDrawId = result.getDrawId();
+    int maxDrawId = Integer.parseInt(result.getDrawId());
     int dbMaxId = getMaxDbDrawId(type);
-    for (int i = dbMaxId+1; i <= Integer.parseInt(maxDrawId); i++) {
+    String sql = "INSERT INTO %s (type, date, drawId, draw) VALUES (?, ?, ?, ?)".formatted(type.getTable());
+    for (int i = dbMaxId+1; i <= maxDrawId; i++) {
       String drawId = String.format("%05d", i);
       result = getInfoByDrawId(type.getWinUrl(), drawId);
       result.setType(type.getType());
 
-      if (bulkResult.size() < 100) {
-        bulkResult.add(new String[] {result.getType(), result.getDate(), result.getDrawId(), result.getDraw()});
-      } else {
-        String sql = "INSERT INTO %s (type, date, drawId, draw) VALUES (?, ?, ?, ?)".formatted(type.getTable());
+      if (bulkResult.size() < 100 && i == maxDrawId || bulkResult.size() == 100) {
         DbUtils.executeBulk(sql, bulkResult);
         bulkResult.clear();
+      } else {
+        bulkResult.add(new String[] {result.getType(), result.getDate(), result.getDrawId(), result.getDraw()});
       }
     }
   }
