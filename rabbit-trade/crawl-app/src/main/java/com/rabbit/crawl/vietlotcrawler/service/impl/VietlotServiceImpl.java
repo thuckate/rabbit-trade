@@ -24,6 +24,24 @@ public class VietlotServiceImpl implements VietlotService {
     bulkInsert(type);
   }
 
+  @Override
+  public void migrate(VietlotType type) {
+    String sql = "SELECT type, date, drawId, draw FROM " + type.getTable();
+    List<Result> rs = DbUtils.getAll(sql);
+    rs.forEach(e -> e.setDraw(splitToCSV(e.getDraw().replace(":", ""))));
+
+    List<String[]> bulk = new ArrayList<>();
+    int size = rs.size();
+    String sqlUpdate = "UPDATE %s SET draw = ? WHERE type = ? AND date = ? AND drawId = ?".formatted(type.getTable());
+    for (int i = 0; i < size; i++) {
+      bulk.add(new String[] {rs.get(i).getDraw(), rs.get(i).getType(), rs.get(i).getDate(), rs.get(i).getDrawId()});
+      if ((bulk.size() < 100 && i + 1 == size) || bulk.size() == 100) {
+        DbUtils.executeBulk(sqlUpdate, bulk);
+        bulk.clear();
+      }
+    }
+  }
+
   private void sequenceInsert(VietlotType type) {
     if (type == null) return;
 
@@ -76,7 +94,7 @@ public class VietlotServiceImpl implements VietlotService {
     // Extract drawData
     String drawData = doc.select("div.day_so_ket_qua_v2").first().text();
 
-    return new Result(newDate, drawId.replace("#", ""), drawData);
+    return new Result(newDate, drawId.replace("#", ""), splitToCSV(drawData));
   }
 
   private void insertIntoDB(Result result, VietlotType type) {
@@ -97,11 +115,10 @@ public class VietlotServiceImpl implements VietlotService {
       result = getInfoByDrawId(type.getWinUrl(), drawId);
       result.setType(type.getType());
 
+      bulkResult.add(new String[] {result.getType(), result.getDate(), result.getDrawId(), result.getDraw()});
       if (bulkResult.size() < 100 && i == maxDrawId || bulkResult.size() == 100) {
         DbUtils.executeBulk(sql, bulkResult);
         bulkResult.clear();
-      } else {
-        bulkResult.add(new String[] {result.getType(), result.getDate(), result.getDrawId(), result.getDraw()});
       }
     }
   }
@@ -110,5 +127,26 @@ public class VietlotServiceImpl implements VietlotService {
     String query = "SELECT MAX(CAST(drawId AS UNSIGNED)) max FROM %s".formatted(type.getTable());
     String rs = DbUtils.executeMaxId(query);
     return rs == null ? 0 : Integer.parseInt(rs);
+  }
+
+  public String splitToCSV(String originalString) {
+    String[] origins = originalString.split("\\|");
+    originalString = origins[0];
+    String lucky = origins.length >= 2 ? "|".concat(origins[1]) : "";
+    StringBuilder resultBuilder = new StringBuilder();
+
+    for (int i = 0; i < originalString.length(); i += 2) {
+      // Extract a substring of length 2
+      String part = originalString.substring(i, Math.min(i + 2, originalString.length()));
+      resultBuilder.append(part);
+
+      // Add a comma if it's not the last part
+      if (i + 2 < originalString.length()) {
+        resultBuilder.append(":");
+      }
+    }
+
+    resultBuilder.append(lucky);
+    return resultBuilder.toString();
   }
 }

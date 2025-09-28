@@ -1,10 +1,12 @@
 package com.rabbit.crawl.vietlotcrawler;
 
+import com.rabbit.crawl.vietlotcrawler.dto.Result;
+
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class DbUtils {
   private static String url = "jdbc:mysql://localhost:3306/vietlott?allowPublicKeyRetrieval=true&useSSL=false"; // Replace with your DB name
@@ -62,5 +64,43 @@ public class DbUtils {
       return null;
     }
     return null;
+  }
+
+  public static List<Result> getAll(String sql) {
+    List<Result> rs = new ArrayList<>();
+    try (Connection conn = DriverManager.getConnection(url, user, password)) {
+      PreparedStatement stmt = conn.prepareStatement(sql);
+      ResultSet resultSet = stmt.executeQuery();
+      while (resultSet.next()) {
+        String type = resultSet.getString("type");
+        String date = resultSet.getString("date");
+        String drawId = resultSet.getString("drawId");
+        String draw = resultSet.getString("draw");
+        rs.add(new Result(date, drawId, draw, type));
+      }
+    } catch (SQLException e) {
+      return new ArrayList<>();
+    }
+
+    return rs;
+  }
+
+  public static Map<String, String> getAllMap(String sql) {
+    Map<String, String> rs = new HashMap<>();
+    try (Connection conn = DriverManager.getConnection(url, user, password)) {
+      PreparedStatement stmt = conn.prepareStatement(sql);
+      ResultSet resultSet = stmt.executeQuery();
+      while (resultSet.next()) {
+        String type = resultSet.getString("type");
+        String date = resultSet.getString("date");
+        String drawId = resultSet.getString("drawId");
+        String draw = resultSet.getString("draw");
+        rs.put(draw, drawId);
+      }
+    } catch (SQLException e) {
+      return new HashMap<>();
+    }
+
+    return rs;
   }
 }

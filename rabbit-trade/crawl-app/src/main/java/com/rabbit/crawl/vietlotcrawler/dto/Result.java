@@ -15,6 +15,13 @@ public class Result {
     this.draw = draw;
   }
 
+  public Result(String date, String drawId, String draw, String type) {
+    this.date = date;
+    this.drawId = drawId;
+    this.draw = draw;
+    this.type = type;
+  }
+
   public String getDate() {
     return date;
   }
