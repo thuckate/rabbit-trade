@@ -25,6 +25,34 @@ public enum VietlotType {
     return String.format(WIN_URL, type, "%s");
   }
 
+  public int getTotalSet() {
+    return switch (type) {
+      case "655" -> 8_000_000;
+      case "645" -> 5_000_000;
+      default -> 3_000_000;
+    };
+  }
+
+  public int getPool() {
+    return switch (type) {
+      case "655" -> 55;
+      case "645" -> 45;
+      default -> 35;
+    };
+  }
+
+  public int getCount() {
+    if (type == "535") {
+      return 5;
+    }
+
+    return 6;
+  }
+
+  public static void main(String[] args) {
+    VietlotType.VIETLOT_655.getTotalSet();
+  }
+
   public String getTable() {
     return switch (type) {
       case "535" -> "lotto535";

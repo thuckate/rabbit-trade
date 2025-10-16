@@ -1,5 +1,6 @@
 package com.rabbit.crawl.vietlotcrawler;
 
+import com.rabbit.crawl.vietlotcrawler.constants.VietlotType;
 import com.rabbit.crawl.vietlotcrawler.dto.Result;
 
 import java.sql.*;
@@ -102,5 +103,21 @@ public class DbUtils {
     }
 
     return rs;
+  }
+
+  public static String loadNewestDraw(VietlotType type) throws SQLException {
+
+    String query = "SELECT draw FROM %s ORDER BY drawId DESC LIMIT 1".formatted(type.getTable());
+
+    try (Connection conn = DriverManager.getConnection(url, user, password);
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(query)) {
+
+      while (rs.next()) {
+        return rs.getString("draw");
+      }
+    }
+
+    return null;
   }
 }

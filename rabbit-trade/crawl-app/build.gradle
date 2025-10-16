@@ -16,7 +16,11 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.jsoup:jsoup:1.16.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'org.seleniumhq.selenium:selenium-java:4.19.1'
+    implementation 'org.seleniumhq.selenium:selenium-edge-driver:4.19.1'
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
     implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'org.json:json:20231013'
 }
 
 test {
